@@ -48,37 +48,33 @@
     }
   </style>
 </head>
-
 <body>
 
-  <h1>LiveSphere</h1>
-  <p>Stay Ahead, Stay Live</p>
+<h1>LiveSphere</h1>
+<p>Stay Ahead, Stay Live</p>
 
-  <button onclick="loginWithGoogle()">
-    Google Login
-  </button>
+<button onclick="loginWithGoogle()">
+  Google Login
+</button>
 
-  <button onclick="logoutUser()">
-    Logout
-  </button>
+<button onclick="logoutUser()">
+  Logout
+</button>
 
-  <button onclick="enableNotifications()">
-    Enable Notifications
-  </button>
+<button onclick="enableNotifications()">
+  Enable Notifications
+</button>
 
-  <div id="userInfo"></div>
+<div id="userInfo"></div>
 
-  <div id="adminPanel">
-    <h2>Admin Panel</h2>
-    <button>Add News</button>
-  </div>
+<div id="adminPanel">
+  <h2>Admin Panel</h2>
+  <button>Add News</button>
+</div>
 
 <script type="module">
 
-// Firebase Imports
-
-import { initializeApp }
-from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
 
 import {
   getAuth,
@@ -86,53 +82,39 @@ import {
   signInWithPopup,
   signOut,
   onAuthStateChanged
-}
-from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 import {
   getFirestore,
   doc,
   setDoc,
   getDoc
-}
-from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 import {
   getMessaging,
   getToken
-}
-from "https://www.gstatic.com/firebasejs/12.0.0/firebase-messaging.js";
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-messaging.js";
 
 
 // Firebase Config
 
 const firebaseConfig = {
-
   apiKey: "AIzaSyBdrls-3ELC3Z2oR3EoAXaR3nZp0CEApsM",
-
   authDomain: "livesphere-3bb80.firebaseapp.com",
-
   projectId: "livesphere-3bb80",
-
   storageBucket: "livesphere-3bb80.firebasestorage.app",
-
   messagingSenderId: "808784573001",
-
   appId: "1:808784573001:web:dfda2b7b4cb7fa2f3d4598"
-
 };
 
 
 // Initialize Firebase
 
 const app = initializeApp(firebaseConfig);
-
 const auth = getAuth(app);
-
 const db = getFirestore(app);
-
 const messaging = getMessaging(app);
-
 const provider = new GoogleAuthProvider();
 
 
@@ -143,7 +125,6 @@ async function loginWithGoogle(){
   try{
 
     const result = await signInWithPopup(auth, provider);
-
     const user = result.user;
 
     console.log("UID:", user.uid);
@@ -151,13 +132,9 @@ async function loginWithGoogle(){
     await setDoc(doc(db, "users", user.uid), {
 
       uid: user.uid,
-
       name: user.displayName,
-
       email: user.email,
-
       photo: user.photoURL,
-
       createdAt: new Date().toISOString()
 
     });
@@ -169,7 +146,6 @@ async function loginWithGoogle(){
   catch(error){
 
     console.log(error);
-
     alert(error.message);
 
   }
@@ -204,7 +180,7 @@ async function logoutUser(){
 window.logoutUser = logoutUser;
 
 
-// User State Check
+// User Check
 
 onAuthStateChanged(auth, async (user)=>{
 
@@ -220,9 +196,10 @@ onAuthStateChanged(auth, async (user)=>{
 
     `;
 
+
     // Admin Check
 
-    const adminRef = doc(db, "admins", user.uid);
+    const adminRef = doc(db,"admins",user.uid);
 
     const adminSnap = await getDoc(adminRef);
 
@@ -243,9 +220,15 @@ async function generateDeviceToken(){
 
   try{
 
+    const registration = await navigator.serviceWorker.register(
+      "/livesphere/firebase-messaging-sw.js"
+    );
+
     const token = await getToken(messaging, {
 
-      vapidKey: "BKwdPrnDmO-hk1FvqipY3l4WA81DBpWibqt_JKE3NXKPdlCiQMPLc4UDC27_9PjZLsZFdss1DAE2bnmQCONB_pI"
+      vapidKey: "BKwdPrnDmO-hk1FvqipY3l4WA81DBpWibqt_JKE3NXKPdlCiQMPLc4UDC27_9PjZLsZFdss1DAE2bnmQCONB_pI",
+
+      serviceWorkerRegistration: registration
 
     });
 
@@ -254,6 +237,8 @@ async function generateDeviceToken(){
       console.log("Device Token:", token);
 
       alert("Device Token Generated Successfully");
+
+      console.log(token);
 
     }
 
@@ -269,7 +254,7 @@ async function generateDeviceToken(){
 
     console.log(error);
 
-    alert(error.message);
+    alert("Error: " + error.message);
 
   }
 
@@ -299,40 +284,6 @@ async function enableNotifications(){
 }
 
 window.enableNotifications = enableNotifications;
-
-
-// Register Service Worker
-
-if('serviceWorker' in navigator){
-
-  window.addEventListener('load', async ()=>{
-
-    try{
-
-      const registration =
-      await navigator.serviceWorker.register(
-        '/livesphere/firebase-messaging-sw.js'
-      );
-
-      console.log(
-        "Service Worker Registered",
-        registration
-      );
-
-    }
-
-    catch(error){
-
-      console.log(
-        "Service Worker Error",
-        error
-      );
-
-    }
-
-  });
-
-}
 
 </script>
 
