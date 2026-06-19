@@ -132,8 +132,6 @@ async function loginWithGoogle(){
 
     const user = result.user;
 
-    console.log("UID:", user.uid);
-
     await setDoc(doc(db, "users", user.uid), {
 
       uid: user.uid,
@@ -218,41 +216,6 @@ onAuthStateChanged(auth, async (user)=>{
 });
 
 
-// Generate Device Token
-
-async function generateDeviceToken(){
-
-  try{
-
-    const token = await getToken(messaging, {
-
-      vapidKey: "BKwdPrnDmO-hk1FvqipY3l4WA81DBpWibqt_JKE3NXKPdlCiQMPLc4UDC27_9PjZLsZFdss1DAE2bnmQCONB_pI"
-
-    });
-
-    if(token){
-
-      alert("Device Token:\n\n" + token);
-
-    }else{
-
-      alert("Token Generate Nahi Hua");
-
-    }
-
-  }
-
-  catch(error){
-
-    alert("Error:\n\n" + error.message);
-
-    console.log(error);
-
-  }
-
-}
-
-
 // Notification Permission
 
 async function enableNotifications(){
@@ -277,126 +240,49 @@ async function enableNotifications(){
 
 window.enableNotifications = enableNotifications;
 
-</script>
 
-</body>
-</html>    Google Login
-  </button>
+// Generate Device Token
 
-  <button onclick="logoutUser()">
-    Logout
-  </button>
-
-  <button onclick="enableNotifications()">
-    Enable Notifications
-  </button>
-
-  <div id="userInfo"></div>
-
-  <div id="adminPanel">
-    <h2>Admin Panel</h2>
-    <button>Add News</button>
-  </div>
-
-
-<script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-
-import {
-  getAuth,
-  GoogleAuthProvider,
-  signInWithPopup,
-  signOut,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-
-import {
-  getFirestore,
-  doc,
-  setDoc,
-  getDoc
-} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-
-import {
-  getMessaging,
-  getToken
-} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-messaging.js";
-
-
-// ===== Firebase Config =====
-
-const firebaseConfig = {
-
-  apiKey: "AIzaSyBdrls-3ELC3Z2oR3EoAXaR3nZp0CEApsM",
-
-  authDomain: "livesphere-3bb80.firebaseapp.com",
-
-  projectId: "livesphere-3bb80",
-
-  storageBucket: "livesphere-3bb80.firebasestorage.app",
-
-  messagingSenderId: "808784573001",
-
-  appId: "1:808784573001:web:dfda2b7b4cb7fa2f3d4598"
-
-};
-
-
-// ===== Initialize Firebase =====
-
-const app = initializeApp(firebaseConfig);
-
-const auth = getAuth(app);
-
-const db = getFirestore(app);
-
-const messaging = getMessaging(app);
-
-const provider = new GoogleAuthProvider();
-
-
-// ===== Google Login =====
-
-async function loginWithGoogle(){
+async function generateDeviceToken(){
 
   try{
 
-    const result = await signInWithPopup(auth, provider);
+    const token = await getToken(messaging, {
 
-    const user = result.user;
-
-    console.log("UID:", user.uid);
-
-    await setDoc(doc(db, "users", user.uid), {
-
-      uid: user.uid,
-
-      name: user.displayName,
-
-      email: user.email,
-
-      photo: user.photoURL,
-
-      createdAt: new Date().toISOString()
+      vapidKey: "BKwdPrnDmO-hk1FvqipY3l4WA81DBpWibqt_JKE3NXKPdlCiQMPLc4UDC27_9PjZLsZFdss1DAE2bnmQCONB_pI"
 
     });
 
-    alert("Login Successful");
+    if(token){
+
+      alert("Device Token:\n\n" + token);
+
+      console.log(token);
+
+    }
+
+    else{
+
+      alert("Token Generate Nahi Hua");
+
+    }
 
   }
 
   catch(error){
 
-    console.log(error);
+    alert("Error:\n\n" + error.message);
 
-    alert(error.message);
+    console.log(error);
 
   }
 
 }
 
-window.loginWithGoogle = loginWithGoogle;
+</script>
+
+</body>
+</html>nWithGoogle = loginWithGoogle;
 
 
 // ===== Logout =====
