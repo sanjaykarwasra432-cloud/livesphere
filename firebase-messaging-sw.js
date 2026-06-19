@@ -1,5 +1,5 @@
-importScripts('https://www.gstatic.com/firebasejs/12.0.0/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/12.0.0/firebase-messaging-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/11.10.0/firebase-messaging-compat.js');
 
 firebase.initializeApp({
   apiKey: "AIzaSyBdrls-3ELC3Z2oR3EoAXaR3nZp0CEApsM",
@@ -13,25 +13,11 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
-
-  console.log(
-    '[firebase-messaging-sw.js] Background Message ',
-    payload
-  );
-
-  const notificationTitle =
-    payload.notification?.title || 'LiveSphere';
-
-  const notificationOptions = {
-    body:
-      payload.notification?.body ||
-      'New update available',
-    icon: '/icon-192.png'
-  };
-
   self.registration.showNotification(
-    notificationTitle,
-    notificationOptions
+    payload.notification.title,
+    {
+      body: payload.notification.body,
+      icon: payload.notification.icon
+    }
   );
-
 });
