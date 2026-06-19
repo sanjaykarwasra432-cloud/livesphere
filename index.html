@@ -1,118 +1,253 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LiveSphere</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LiveSphere</title>
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
+  <style>
+    body{
+      font-family: Arial, sans-serif;
+      background:#f5f5f5;
+      text-align:center;
+      padding:20px;
+    }
 
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
-            text-align: center;
-            width: 350px;
-        }
+    h1{
+      color:#2196F3;
+    }
 
-        h1 {
-            margin-bottom: 20px;
-        }
+    button{
+      padding:12px 20px;
+      margin:10px;
+      border:none;
+      border-radius:8px;
+      background:#2196F3;
+      color:white;
+      font-size:16px;
+      cursor:pointer;
+    }
 
-        button {
-            background: #4285F4;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-        }
+    #userInfo{
+      background:white;
+      padding:15px;
+      border-radius:10px;
+      margin-top:20px;
+    }
 
-        button:hover {
-            opacity: 0.9;
-        }
+    #adminPanel{
+      display:none;
+      background:white;
+      padding:20px;
+      border-radius:10px;
+      margin-top:20px;
+    }
 
-        #userInfo {
-            margin-top: 20px;
-            display: none;
-        }
-
-        img {
-            border-radius: 50%;
-            margin-top: 10px;
-        }
-    </style>
+    img{
+      border-radius:50%;
+    }
+  </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>LiveSphere</h1>
+  <h1>LiveSphere</h1>
+  <p>Stay Ahead, Stay Live</p>
 
-        <button onclick="loginWithGoogle()">
-            Google से Login करें
-        </button>
+  <button onclick="loginWithGoogle()">
+    Google Login
+  </button>
 
-        <div id="userInfo">
-            <h3 id="userName"></h3>
-            <p id="userEmail"></p>
-            <img id="userPhoto" width="100">
-        </div>
-    </div>
+  <button onclick="logoutUser()">
+    Logout
+  </button>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+  <button onclick="enableNotifications()">
+    Enable Notifications
+  </button>
 
-        import {
-            getAuth,
-            GoogleAuthProvider,
-            signInWithPopup
-        } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+  <div id="userInfo"></div>
 
-        const firebaseConfig = {
-  apiKey: "AIzaSyBdrls-3ELC3Z2oR3EoAXaR3nZp0CEApsM",
-  authDomain: "livesphere-3bb80.firebaseapp.com",
-  projectId: "livesphere-3bb80",
-  storageBucket: "livesphere-3bb80.firebasestorage.app",
-  messagingSenderId: "808784573001",
-  appId: "1:808784573001:web:dfda2b7b4cb7fa2f3d4598"
+  <div id="adminPanel">
+    <h2>Admin Panel</h2>
+    <button>Add News</button>
+  </div>
+
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+
+// ===== Firebase Config =====
+
+const firebaseConfig = {
+
+  apiKey: "YOUR_API_KEY",
+
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+
+  projectId: "YOUR_PROJECT_ID",
+
+  storageBucket: "YOUR_PROJECT.appspot.com",
+
+  messagingSenderId: "YOUR_SENDER_ID",
+
+  appId: "YOUR_APP_ID"
+
 };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
 
-        const provider = new GoogleAuthProvider();
+// ===== Initialize Firebase =====
 
-        async function loginWithGoogle() {
-            try {
-                const result = await signInWithPopup(auth, provider);
+const app = initializeApp(firebaseConfig);
 
-                const user = result.user;
+const auth = getAuth(app);
 
-                document.getElementById("userInfo").style.display = "block";
-                document.getElementById("userName").innerText = user.displayName;
-                document.getElementById("userEmail").innerText = user.email;
-                document.getElementById("userPhoto").src = user.photoURL;
+const db = getFirestore(app);
 
-                console.log("Login Successful");
-            } catch (error) {
-                console.error(error);
-                alert(error.message);
-            }
-        }
+const provider = new GoogleAuthProvider();
 
-        window.loginWithGoogle = loginWithGoogle;
-    </script>
+
+// ===== Google Login =====
+
+async function loginWithGoogle(){
+
+  try{
+
+    const result = await signInWithPopup(auth, provider);
+
+    const user = result.user;
+
+    console.log(user.uid);
+
+    await setDoc(doc(db, "users", user.uid), {
+
+      uid: user.uid,
+
+      name: user.displayName,
+
+      email: user.email,
+
+      photo: user.photoURL,
+
+      createdAt: new Date().toISOString()
+
+    });
+
+    alert("Login Successful");
+
+  }
+
+  catch(error){
+
+    console.log(error);
+
+    alert(error.message);
+
+  }
+
+}
+
+window.loginWithGoogle = loginWithGoogle;
+
+
+// ===== Logout =====
+
+async function logoutUser(){
+
+  try{
+
+    await signOut(auth);
+
+    alert("Logout Successful");
+
+    location.reload();
+
+  }
+
+  catch(error){
+
+    console.log(error);
+
+  }
+
+}
+
+window.logoutUser = logoutUser;
+
+
+// ===== User Check =====
+
+onAuthStateChanged(auth, async (user)=>{
+
+  if(user){
+
+    document.getElementById("userInfo").innerHTML = `
+
+      <h3>Welcome ${user.displayName}</h3>
+
+      <img src="${user.photoURL}" width="100">
+
+      <p>${user.email}</p>
+
+    `;
+
+
+    // ===== Admin Check =====
+
+    const adminRef = doc(db,"admins",user.uid);
+
+    const adminSnap = await getDoc(adminRef);
+
+    if(adminSnap.exists()){
+
+      document.getElementById("adminPanel").style.display="block";
+
+    }
+
+  }
+
+});
+
+
+// ===== Notification Permission =====
+
+async function enableNotifications(){
+
+  const permission = await Notification.requestPermission();
+
+  if(permission === "granted"){
+
+    alert("Notifications Enabled");
+
+  }
+
+  else{
+
+    alert("Notification Permission Denied");
+
+  }
+
+}
+
+window.enableNotifications = enableNotifications;
+
+</script>
 
 </body>
 </html>
